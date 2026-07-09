@@ -1,0 +1,12 @@
+export const THEME = {
+  colors: {
+    navy: '#0F172A',
+    gold: '#D4AF37',
+    ivory: '#F8F5F0',
+    card: '#FFFFFF',
+  },
+  fonts: {
+    display: '"Playfair Display", serif',
+    body: '"Inter", sans-serif',
+  },
+}

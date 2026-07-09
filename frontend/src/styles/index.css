@@ -1,0 +1,28 @@
+@import "tailwindcss";
+
+@theme {
+  --color-navy: #0F172A;
+  --color-gold: #D4AF37;
+  --color-ivory: #F8F5F0;
+  --color-card: #FFFFFF;
+
+  --font-display: "Playfair Display", serif;
+  --font-body: "Inter", sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 5rem; /* offsets the fixed h-20 navbar */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+body {
+  background-color: var(--color-ivory);
+  font-family: var(--font-body);
+  color: var(--color-navy);
+}
