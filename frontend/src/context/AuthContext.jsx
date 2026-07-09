@@ -1,32 +1,52 @@
-import { createContext, useContext, useMemo, useState } from 'react'
+import { createContext, useContext, useMemo, useState, useEffect } from 'react'
+import { AuthService } from '../services/AuthService.js'
 
 const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
+  const [loading, setLoading] = useState(true)
 
-  // Placeholder only — real authentication (Azure AD B2C / custom backend)
-  // replaces these stubs in a later milestone.
-  const login = (credentials) => {
-    console.warn('AuthContext.login: not implemented yet', credentials)
+  // Initialize auth state from local storage on mount
+  useEffect(() => {
+    const currentUser = AuthService.getCurrentUser()
+    if (currentUser) {
+      setUser(currentUser)
+    }
+    setLoading(false)
+  }, [])
+
+  const login = async (credentials) => {
+    try {
+      const loggedUser = await AuthService.login(credentials)
+      setUser(loggedUser)
+      return loggedUser
+    } catch (e) {
+      throw e
+    }
   }
 
-  const logout = () => {
-    console.warn('AuthContext.logout: not implemented yet')
+  const logout = async () => {
+    await AuthService.logout()
     setUser(null)
   }
 
   const value = useMemo(
     () => ({
       user,
+      loading,
       isAuthenticated: Boolean(user),
       login,
       logout,
     }),
-    [user],
+    [user, loading],
   )
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+  return (
+    <AuthContext.Provider value={value}>
+      {!loading && children}
+    </AuthContext.Provider>
+  )
 }
 
 export function useAuth() {
