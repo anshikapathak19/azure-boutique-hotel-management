@@ -4,9 +4,10 @@ export const THEME = {
     gold: '#D4AF37',
     ivory: '#F8F5F0',
     card: '#FFFFFF',
+    charcoal: '#1C1C1C',
   },
   fonts: {
-    display: '"Playfair Display", serif',
+    display: '"Cormorant Garamond", serif',
     body: '"Inter", sans-serif',
   },
 }

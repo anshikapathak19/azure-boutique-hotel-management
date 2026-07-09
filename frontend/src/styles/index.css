@@ -1,13 +1,16 @@
 @import "tailwindcss";
 
 @theme {
+  /* Brand palette */
   --color-navy: #0F172A;
   --color-gold: #D4AF37;
   --color-ivory: #F8F5F0;
   --color-card: #FFFFFF;
+  --color-charcoal: #1C1C1C;
 
-  --font-display: "Cormorant Garamond", Georgia, serif;
-  --font-body: "Inter", system-ui, sans-serif;
+  /* Typography */
+  --font-display: "Cormorant Garamond", serif;
+  --font-body: "Inter", sans-serif;
 }
 
 html {
@@ -23,15 +26,8 @@ html {
 
 body {
   background-color: var(--color-ivory);
-  color: var(--color-navy);
-
   font-family: var(--font-body);
-  font-weight: 400;
-  line-height: 1.65;
-
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
+  color: var(--color-navy);
 }
 h1,
 h2,
