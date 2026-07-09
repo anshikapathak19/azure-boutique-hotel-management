@@ -37,20 +37,20 @@ export default function Navbar() {
         'fixed top-0 inset-x-0 z-50 transition-all duration-300',
         isTransparent
           ? 'bg-transparent'
-          : 'bg-ivory/80 backdrop-blur-md shadow-sm shadow-navy/5 border-b border-navy/5',
+          : 'bg-ivory/70 backdrop-blur-xl shadow-sm shadow-navy/5 border-b border-navy/5',
       ].join(' ')}
     >
-      <Container className="flex items-center justify-between h-20">
+      <Container className="flex items-center justify-between h-24">
         <Link
           to={ROUTES.home}
-          className={`flex items-center gap-2 font-display text-xl tracking-wide ${textColor}`}
+         className={`flex items-center gap-3 font-display text-[1.7rem] font-medium tracking-[-0.02em] ${textColor}`}
         >
           <Gem className="w-5 h-5 text-gold" aria-hidden="true" />
           {BRAND.name}
         </Link>
 
         <nav
-          className={`hidden md:flex items-center gap-10 font-body text-sm ${textColor}`}
+          className={`hidden md:flex items-center gap-12 font-body text-[15px] font-medium tracking-[0.08em] uppercase ${textColor}`}
           aria-label="Primary"
         >
           {NAV_LINKS.map((link) =>

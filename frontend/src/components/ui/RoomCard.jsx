@@ -16,9 +16,9 @@ export default function RoomCard({
     <motion.article
       whileHover={shouldReduceMotion ? {} : { y: -8 }}
       transition={{ duration: 0.35, ease: 'easeOut' }}
-      className="group bg-card rounded-2xl overflow-hidden shadow-md shadow-navy/5 hover:shadow-xl hover:shadow-navy/10 transition-shadow duration-300"
+      className="group flex h-full flex-col bg-card rounded-2xl overflow-hidden shadow-md shadow-navy/5 hover:shadow-xl hover:shadow-navy/10 transition-shadow duration-300"
     >
-      <div className="relative h-64 overflow-hidden">
+      <div className="relative aspect-[4/3] overflow-hidden">
         <img
           src={image}
           alt={title}
@@ -32,7 +32,7 @@ export default function RoomCard({
         )}
       </div>
 
-      <div className="p-6 md:p-7">
+      <div className="flex flex-1 flex-col p-6 md:p-7">
         <div className="flex items-start justify-between gap-4">
           <h3 className="font-display text-xl md:text-2xl text-navy">{title}</h3>
           {typeof rating === 'number' && (
@@ -60,7 +60,7 @@ export default function RoomCard({
           </ul>
         )}
 
-        <div className="mt-6 flex items-center justify-between border-t border-navy/10 pt-5">
+        <div className="mt-auto pt-6 border-t border-navy/10 flex items-center justify-between">
           <p className="font-body text-navy">
             <span className="font-display text-lg md:text-xl text-navy">${price}</span>
             <span className="text-sm text-navy/60"> / night</span>
