@@ -13,6 +13,8 @@ import { ROUTES } from '@/config/routes.js'
 const LandingPage = lazy(() => import('@/pages/public/LandingPage.jsx'))
 const LoginPage = lazy(() => import('@/pages/public/LoginPage.jsx'))
 const RegisterPage = lazy(() => import('@/pages/public/RegisterPage.jsx'))
+const HotelListingPage = lazy(() => import('@/pages/public/HotelListingPage.jsx'))
+const HotelDetailPage = lazy(() => import('@/pages/public/HotelDetailPage.jsx'))
 const GuestDashboard = lazy(() => import('@/pages/guest/GuestDashboard.jsx'))
 const StaffDashboard = lazy(() => import('@/pages/staff/StaffDashboard.jsx'))
 const AdminDashboard = lazy(() => import('@/pages/admin/AdminDashboard.jsx'))
@@ -31,6 +33,8 @@ const router = createBrowserRouter([
       { path: ROUTES.home, element: withSuspense(LandingPage) },
       { path: ROUTES.login, element: withSuspense(LoginPage) },
       { path: ROUTES.register, element: withSuspense(RegisterPage) },
+      { path: ROUTES.hotels, element: withSuspense(HotelListingPage) },
+      { path: '/hotels/:id', element: withSuspense(HotelDetailPage) },
       { path: '*', element: <NotFoundPage /> },
     ],
   },

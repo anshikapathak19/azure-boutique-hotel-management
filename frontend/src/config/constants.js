@@ -9,7 +9,26 @@ export const CONTACT = {
 }
 
 export const SOCIAL_LINKS = {
-  instagram: 'https://instagram.com/azurestay',
-  facebook: 'https://facebook.com/azurestay',
-  twitter: 'https://twitter.com/azurestay',
+  instagram: "#",
+  facebook: "#",
+  twitter: "#",
 }
+
+// Shared option sets for the Hotel Discovery module (search + filters)
+export const HOTEL_CATEGORIES = ['Boutique Hotel', 'Resort', 'Villa', 'Heritage Stay']
+
+export const AMENITY_FILTER_OPTIONS = [
+  'Free WiFi',
+  'Infinity Pool',
+  'Spa',
+  'Fine Dining',
+  'Private Pool',
+  'Butler Service',
+]
+
+export const SORT_OPTIONS = [
+  { value: 'newest', label: 'Newest' },
+  { value: 'rating', label: 'Highest Rated' },
+  { value: 'price-asc', label: 'Price: Low to High' },
+  { value: 'price-desc', label: 'Price: High to Low' },
+]
