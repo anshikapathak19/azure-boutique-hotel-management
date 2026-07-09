@@ -1,99 +1,67 @@
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
-import { SlidersHorizontal, X } from 'lucide-react'
+import { SlidersHorizontal, Grid, List } from 'lucide-react'
 
 import Container from '@/components/ui/Container.jsx'
 import SectionHeading from '@/components/ui/SectionHeading.jsx'
 import RoomCard from '@/components/ui/RoomCard.jsx'
 import Button from '@/components/ui/Button.jsx'
+import Drawer from '@/components/ui/Drawer.jsx'
 import HotelSearchBar from '@/components/hotels/HotelSearchBar.jsx'
 import HotelFilters from '@/components/hotels/HotelFilters.jsx'
 import HotelCardSkeleton from '@/components/hotels/HotelCardSkeleton.jsx'
 import EmptyState from '@/components/hotels/EmptyState.jsx'
 import Pagination from '@/components/hotels/Pagination.jsx'
-import { rooms as hotels } from '@/data/rooms.js'
+import { HotelService } from '@/services/HotelService.js'
 
 const PAGE_SIZE = 6
 
 const DEFAULT_FILTERS = {
   destination: '',
   category: 'all',
-  priceRange: 'any',
+  maxPrice: 1000,
   rating: 'any',
   amenities: [],
   sortBy: 'newest',
-}
-
-function matchesPriceRange(price, range) {
-  if (range === 'any') return true
-  if (range === '800+') return price >= 800
-  const [min, max] = range.split('-').map(Number)
-  return price >= min && price <= max
-}
-
-function matchesRating(rating, minRating) {
-  if (minRating === 'any') return true
-  return rating >= Number(minRating)
+  checkIn: '',
+  checkOut: '',
 }
 
 export default function HotelListingPage() {
   const shouldReduceMotion = useReducedMotion()
   const [filters, setFilters] = useState(DEFAULT_FILTERS)
   const [page, setPage] = useState(1)
+  const [layout, setLayout] = useState('grid') // 'grid' | 'list'
   const [isLoading, setIsLoading] = useState(true)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
-
-  const filteredHotels = useMemo(() => {
-    let result = hotels.filter((hotel) => {
-      const matchesDestination =
-        filters.destination.trim() === '' ||
-        `${hotel.name} ${hotel.location} ${hotel.country}`
-          .toLowerCase()
-          .includes(filters.destination.trim().toLowerCase())
-
-      const matchesCategory = filters.category === 'all' || hotel.category === filters.category
-
-      const matchesAmenities =
-        filters.amenities.length === 0 ||
-        filters.amenities.every((amenity) => hotel.amenities.includes(amenity))
-
-      return (
-        matchesDestination &&
-        matchesCategory &&
-        matchesPriceRange(hotel.startingPrice, filters.priceRange) &&
-        matchesRating(hotel.rating, filters.rating) &&
-        matchesAmenities
-      )
-    })
-
-    switch (filters.sortBy) {
-      case 'rating':
-        result = [...result].sort((a, b) => b.rating - a.rating)
-        break
-      case 'price-asc':
-        result = [...result].sort((a, b) => a.startingPrice - b.startingPrice)
-        break
-      case 'price-desc':
-        result = [...result].sort((a, b) => b.startingPrice - a.startingPrice)
-        break
-      default:
-        // 'newest' — keep original catalog order
-        break
-    }
-
-    return result
-  }, [filters])
+  const [filteredHotels, setFilteredHotels] = useState([])
 
   const totalPages = Math.max(1, Math.ceil(filteredHotels.length / PAGE_SIZE))
   const paginatedHotels = filteredHotels.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
-  // Simulates a brief fetch on every filter/page change — replaced by a
-  // real API call in a later milestone.
+  // Fetch hotels asynchronously from the HotelService
   useEffect(() => {
+    let active = true
     setIsLoading(true)
-    const timer = setTimeout(() => setIsLoading(false), 400)
-    return () => clearTimeout(timer)
-  }, [filters, page])
+    
+    HotelService.getHotels(filters)
+      .then((res) => {
+        if (active) {
+          setFilteredHotels(res.data)
+          setIsLoading(false)
+        }
+      })
+      .catch((err) => {
+        console.error('Failed to load hotels:', err)
+        if (active) {
+          setIsLoading(false)
+        }
+      })
+
+    return () => {
+      active = false
+    }
+  }, [filters])
 
   useEffect(() => {
     setPage(1)
@@ -103,6 +71,8 @@ export default function HotelListingPage() {
     setFilters(DEFAULT_FILTERS)
     setPage(1)
   }
+
+  const isList = layout === 'list'
 
   return (
     <div className="pt-28 pb-24 md:pb-32">
@@ -127,25 +97,69 @@ export default function HotelListingPage() {
             </div>
           </aside>
 
+          {/* Mobile filter bar */}
           <div className="lg:hidden flex items-center justify-between">
             <button
               type="button"
               onClick={() => setIsDrawerOpen(true)}
-              className="inline-flex items-center gap-2 font-body text-sm text-navy border border-navy/15 rounded-full px-5 py-2.5 hover:border-gold hover:text-gold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold"
+              className="inline-flex items-center gap-2 font-body text-sm text-navy border border-navy/15 rounded-full px-5 py-2.5 hover:border-gold hover:text-gold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold cursor-pointer"
             >
               <SlidersHorizontal className="w-4 h-4" aria-hidden="true" />
               Filters
             </button>
-            <p className="font-body text-sm text-navy/60">{filteredHotels.length} hotels</p>
+            
+            <div className="flex items-center gap-4">
+              <p className="font-body text-sm text-navy/60">{filteredHotels.length} hotels</p>
+              
+              {/* Layout Toggle */}
+              <div className="flex items-center gap-1 border border-navy/10 rounded-full p-1 bg-white">
+                <button
+                  type="button"
+                  onClick={() => setLayout('grid')}
+                  className={`p-1.5 rounded-full transition-colors cursor-pointer ${layout === 'grid' ? 'bg-navy text-white' : 'text-navy/60 hover:text-navy'}`}
+                  aria-label="Grid layout"
+                >
+                  <Grid className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setLayout('list')}
+                  className={`p-1.5 rounded-full transition-colors cursor-pointer ${layout === 'list' ? 'bg-navy text-white' : 'text-navy/60 hover:text-navy'}`}
+                  aria-label="List layout"
+                >
+                  <List className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
           </div>
 
           <div className="flex-1">
             <div className="hidden lg:flex items-center justify-between mb-6">
               <p className="font-body text-sm text-navy/60">{filteredHotels.length} hotels found</p>
+              
+              {/* Layout Toggle */}
+              <div className="flex items-center gap-1 border border-navy/10 rounded-full p-1 bg-white">
+                <button
+                  type="button"
+                  onClick={() => setLayout('grid')}
+                  className={`p-1.5 rounded-full transition-colors cursor-pointer ${layout === 'grid' ? 'bg-navy text-white' : 'text-navy/60 hover:text-navy'}`}
+                  aria-label="Grid layout"
+                >
+                  <Grid className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setLayout('list')}
+                  className={`p-1.5 rounded-full transition-colors cursor-pointer ${layout === 'list' ? 'bg-navy text-white' : 'text-navy/60 hover:text-navy'}`}
+                  aria-label="List layout"
+                >
+                  <List className="w-3.5 h-3.5" />
+                </button>
+              </div>
             </div>
 
             {isLoading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8 md:gap-10">
+              <div className={isList ? 'flex flex-col gap-8 md:gap-10' : 'grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8 md:gap-10'}>
                 {Array.from({ length: PAGE_SIZE }).map((_, index) => (
                   <HotelCardSkeleton key={index} />
                 ))}
@@ -157,7 +171,7 @@ export default function HotelListingPage() {
                 initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, ease: 'easeOut' }}
-                className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8 md:gap-10"
+                className={isList ? 'flex flex-col gap-8 md:gap-10' : 'grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8 md:gap-10'}
               >
                 {paginatedHotels.map((hotel) => (
                   <RoomCard
@@ -171,6 +185,7 @@ export default function HotelListingPage() {
                     amenities={hotel.amenities}
                     badge={hotel.badge}
                     to={`/hotels/${hotel.id}`}
+                    layout={layout}
                   />
                 ))}
               </motion.div>
@@ -183,45 +198,26 @@ export default function HotelListingPage() {
         </div>
       </Container>
 
-      {isDrawerOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden">
-          <div
-            className="absolute inset-0 bg-navy/50 backdrop-blur-sm"
-            onClick={() => setIsDrawerOpen(false)}
-            aria-hidden="true"
-          />
-          <motion.div
-            initial={shouldReduceMotion ? false : { x: '100%' }}
-            animate={{ x: 0 }}
-            transition={{ duration: 0.3, ease: 'easeOut' }}
-            className="absolute right-0 top-0 h-full w-full max-w-sm bg-ivory overflow-y-auto p-6"
-            role="dialog"
-            aria-modal="true"
-            aria-label="Filter hotels"
-          >
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="font-display text-xl text-navy">Filters</h2>
-              <button
-                type="button"
-                onClick={() => setIsDrawerOpen(false)}
-                aria-label="Close filters"
-                className="p-2 text-navy hover:text-gold transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <HotelFilters filters={filters} onChange={setFilters} onReset={handleResetFilters} />
-            <Button
-              variant="gold"
-              size="md"
-              className="w-full mt-6"
-              onClick={() => setIsDrawerOpen(false)}
-            >
-              Show {filteredHotels.length} Hotels
-            </Button>
-          </motion.div>
+      {/* Mobile filter Drawer */}
+      <Drawer
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        title="Filter Hotels"
+      >
+        <div className="flex-1 overflow-y-auto">
+          <HotelFilters filters={filters} onChange={setFilters} onReset={handleResetFilters} />
         </div>
-      )}
+        <div className="mt-8 pt-4 border-t border-navy/10 bg-ivory">
+          <Button
+            variant="gold"
+            size="md"
+            className="w-full cursor-pointer"
+            onClick={() => setIsDrawerOpen(false)}
+          >
+            Show {filteredHotels.length} Hotels
+          </Button>
+        </div>
+      </Drawer>
     </div>
   )
 }

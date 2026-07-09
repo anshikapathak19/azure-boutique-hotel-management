@@ -14,16 +14,21 @@ export default function RoomCard({
   badge,
   href = '#',
   to,
+  layout = 'grid',
 }) {
   const shouldReduceMotion = useReducedMotion()
+  const isList = layout === 'list'
 
   return (
     <motion.article
       whileHover={shouldReduceMotion ? {} : { y: -8 }}
       transition={{ duration: 0.35, ease: 'easeOut' }}
-      className="group bg-card rounded-2xl overflow-hidden shadow-md shadow-navy/5 hover:shadow-xl hover:shadow-navy/10 transition-shadow duration-300 flex flex-col"
+      className={[
+        'group bg-card rounded-2xl overflow-hidden shadow-md shadow-navy/5 hover:shadow-xl hover:shadow-navy/10 transition-shadow duration-300 flex',
+        isList ? 'flex-col md:flex-row' : 'flex-col',
+      ].join(' ')}
     >
-      <div className="relative h-64 overflow-hidden">
+      <div className={['relative overflow-hidden', isList ? 'w-full md:w-80 h-64 md:h-auto' : 'h-64'].join(' ')}>
         <img
           src={image}
           alt={name}
@@ -37,7 +42,7 @@ export default function RoomCard({
         )}
       </div>
 
-      <div className="p-6 md:p-7 flex flex-col flex-1">
+      <div className={['flex flex-col flex-1', isList ? 'p-6 md:p-8' : 'p-6 md:p-7'].join(' ')}>
         <div className="flex items-start justify-between gap-4">
           <h3 className="font-display text-xl md:text-2xl text-navy">{name}</h3>
           {typeof rating === 'number' && (
@@ -66,7 +71,7 @@ export default function RoomCard({
           </ul>
         )}
 
-        <div className="mt-auto pt-5 border-t border-navy/10 flex items-center justify-between gap-4">
+        <div className="mt-auto pt-5 border-t border-navy/10 flex items-center justify-between gap-4 mt-6">
           <div>
             <p className="font-display text-lg md:text-xl text-navy">
               From ${price}

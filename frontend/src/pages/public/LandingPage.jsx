@@ -5,6 +5,8 @@ import LuxuryExperience from '@/components/landing/LuxuryExperience.jsx'
 import WhyChooseAzureStay from '@/components/landing/WhyChooseAzureStay.jsx'
 import GalleryPreview from '@/components/landing/GalleryPreview.jsx'
 import Testimonials from '@/components/landing/Testimonials.jsx'
+import Newsletter from '@/components/landing/Newsletter.jsx'
+import FAQ from '@/components/landing/FAQ.jsx'
 import CallToAction from '@/components/landing/CallToAction.jsx'
 
 export default function LandingPage() {
@@ -17,6 +19,8 @@ export default function LandingPage() {
       <WhyChooseAzureStay />
       <GalleryPreview />
       <Testimonials />
+      <FAQ />
+      <Newsletter />
       <CallToAction />
     </>
   )

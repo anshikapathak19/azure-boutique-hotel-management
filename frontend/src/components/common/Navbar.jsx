@@ -8,12 +8,15 @@ import Button from '@/components/ui/Button.jsx'
 import useScrolled from '@/hooks/useScrolled.js'
 import { ROUTES, NAV_LINKS } from '@/config/routes.js'
 import { BRAND } from '@/config/constants.js'
+import { useAuth } from '@/context/AuthContext.jsx'
+import Avatar from '@/components/ui/Avatar.jsx'
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
   const location = useLocation()
   const scrolled = useScrolled(40)
   const shouldReduceMotion = useReducedMotion()
+  const { user, logout, isAuthenticated } = useAuth()
 
   const isHome = location.pathname === ROUTES.home
   const isTransparent = isHome && !scrolled && !menuOpen
@@ -81,15 +84,38 @@ export default function Navbar() {
         </nav>
 
         <div className={`hidden md:flex items-center gap-6 ${textColor}`}>
-          <Link
-            to={ROUTES.login}
-            className="text-sm font-body hover:text-gold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold rounded-sm"
-          >
-            Login
-          </Link>
-          <Button href={ROUTES.hotels} variant="gold" size="sm">
-           Book Now
-          </Button>
+          {isAuthenticated ? (
+            <>
+              <Link
+                to={user.role === 'admin' ? ROUTES.admin : user.role === 'staff' ? ROUTES.staff : ROUTES.guest}
+                className="flex items-center gap-2 hover:text-gold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold rounded-sm"
+              >
+                <Avatar src={user.avatar} alt={user.name} size="xs" />
+                <span className="text-sm font-body font-medium">
+                  {user.role === 'admin' ? 'Admin Panel' : user.role === 'staff' ? 'Staff Portal' : 'My Account'}
+                </span>
+              </Link>
+              <button
+                type="button"
+                onClick={logout}
+                className="text-sm font-body hover:text-gold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold rounded-sm cursor-pointer"
+              >
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
+              <Link
+                to={ROUTES.login}
+                className="text-sm font-body hover:text-gold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold rounded-sm"
+              >
+                Login
+              </Link>
+              <Button href={ROUTES.hotels} variant="gold" size="sm">
+               Book Now
+              </Button>
+            </>
+          )}
         </div>
 
         <button
@@ -141,13 +167,51 @@ export default function Navbar() {
     </a>
   )
 })}
-              <div className="flex flex-col gap-3 mt-4">
-                <Link to={ROUTES.login} className="text-center py-3 hover:text-gold transition-colors">
-                  Login
-                </Link>
-                <Button href={ROUTES.hotels} variant="gold" size="sm">
-                  Book Now
-                </Button>
+              <div className="flex flex-col gap-3 mt-4 border-t border-navy/10 pt-4">
+                {isAuthenticated ? (
+                  <>
+                    <div className="flex items-center gap-3 px-1 py-2">
+                      <Avatar src={user.avatar} alt={user.name} size="sm" />
+                      <div>
+                        <p className="text-sm font-semibold">{user.name}</p>
+                        <p className="text-xs text-navy/60">{user.email}</p>
+                      </div>
+                    </div>
+                    <Link
+                      to={user.role === 'admin' ? ROUTES.admin : user.role === 'staff' ? ROUTES.staff : ROUTES.guest}
+                      className="text-center py-3 hover:text-gold transition-colors text-sm font-medium"
+                    >
+                      {user.role === 'admin' ? 'Admin Dashboard' : user.role === 'staff' ? 'Staff Dashboard' : 'My Account'}
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        logout()
+                        setMenuOpen(false)
+                      }}
+                      className="text-center py-3 text-rose-600 hover:text-rose-700 transition-colors text-sm font-medium cursor-pointer"
+                    >
+                      Logout
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      to={ROUTES.login}
+                      className="text-center py-3 hover:text-gold transition-colors text-sm font-medium"
+                    >
+                      Login
+                    </Link>
+                    <Button
+                      href={ROUTES.hotels}
+                      variant="gold"
+                      size="sm"
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      Book Now
+                    </Button>
+                  </>
+                )}
               </div>
             </Container>
           </motion.nav>

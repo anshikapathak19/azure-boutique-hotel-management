@@ -31,6 +31,7 @@ export const HotelService = {
           destination = '',
           category = 'all',
           priceRange = 'any',
+          maxPrice = 1000,
           rating = 'any',
           amenities = [],
           sortBy = 'newest',
@@ -49,10 +50,12 @@ export const HotelService = {
             amenities.length === 0 ||
             amenities.every((amenity) => hotel.amenities.includes(amenity))
 
+          const matchesPrice = maxPrice ? hotel.startingPrice <= maxPrice : matchesPriceRange(hotel.startingPrice, priceRange)
+
           return (
             matchesDestination &&
             matchesCategory &&
-            matchesPriceRange(hotel.startingPrice, priceRange) &&
+            matchesPrice &&
             matchesRating(hotel.rating, rating) &&
             matchesAmenities
           )
