@@ -8,17 +8,23 @@ const api = axios.create({
   },
 })
 
-// Placeholder for future auth token injection (Azure AD B2C / custom backend)
+// Inject JWT access tokens into request headers
 api.interceptors.request.use((config) => {
-  // const token = getStoredToken()
-  // if (token) config.headers.Authorization = `Bearer ${token}`
+  const token = localStorage.getItem('azurestay_token')
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`
+  }
   return config
 })
 
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Centralized error handling hook — extend once real endpoints exist.
+    // Handle unauthorized errors (e.g. token expired)
+    if (error.response && error.response.status === 401) {
+      localStorage.removeItem('azurestay_token')
+      localStorage.removeItem('azurestay_user')
+    }
     return Promise.reject(error)
   },
 )
