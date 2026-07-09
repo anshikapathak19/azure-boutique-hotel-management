@@ -53,25 +53,31 @@ export default function Navbar() {
           className={`hidden md:flex items-center gap-12 font-body text-[15px] font-medium tracking-[0.08em] uppercase ${textColor}`}
           aria-label="Primary"
         >
-          {NAV_LINKS.map((link) =>
-            link.path.startsWith('/') ? (
-              <Link
-                key={link.label}
-                to={link.path}
-                className="hover:text-gold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold rounded-sm"
-              >
-                {link.label}
-              </Link>
-            ) : (
-              <a
-                key={link.label}
-                href={link.path}
-                className="hover:text-gold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold rounded-sm"
-              >
-                {link.label}
-              </a>
-            ),
-          )}
+          {NAV_LINKS.map((link) => {
+           const destination = link.path.startsWith('/')
+             ? link.path
+              : isHome
+                ? link.path
+                 : `/${link.path}`
+
+           return link.path.startsWith('/') ? (
+           <Link
+            key={link.label}
+              to={destination}
+              className="hover:text-gold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold rounded-sm"
+               >
+      {link.label}
+    </Link>
+  ) : (
+    <a
+      key={link.label}
+      href={destination}
+      className="hover:text-gold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold rounded-sm"
+    >
+      {link.label}
+    </a>
+  )
+})}
         </nav>
 
         <div className={`hidden md:flex items-center gap-6 ${textColor}`}>
@@ -81,8 +87,8 @@ export default function Navbar() {
           >
             Login
           </Link>
-          <Button href="#booking" variant="gold" size="sm">
-            Book Now
+          <Button href={ROUTES.hotels} variant="gold" size="sm">
+           Book Now
           </Button>
         </div>
 
@@ -110,22 +116,36 @@ export default function Navbar() {
             className="md:hidden bg-ivory/95 backdrop-blur-md border-t border-navy/5 overflow-hidden"
           >
             <Container className="flex flex-col gap-1 py-6 text-navy font-body">
-              {NAV_LINKS.map((link) =>
-                link.path.startsWith('/') ? (
-                  <Link key={link.label} to={link.path} className="py-3 hover:text-gold transition-colors">
-                    {link.label}
-                  </Link>
-                ) : (
-                  <a key={link.label} href={link.path} className="py-3 hover:text-gold transition-colors">
-                    {link.label}
-                  </a>
-                ),
-              )}
+              {NAV_LINKS.map((link) => {
+              const destination = link.path.startsWith('/')
+                ? link.path
+                : isHome
+                 ? link.path
+                    : `/${link.path}`
+
+               return link.path.startsWith('/') ? (
+                <Link
+                   key={link.label}
+                 to={destination}
+                className="py-3 hover:text-gold transition-colors"
+                 >
+      {link.label}
+    </Link>
+  ) : (
+    <a
+      key={link.label}
+      href={destination}
+      className="py-3 hover:text-gold transition-colors"
+    >
+      {link.label}
+    </a>
+  )
+})}
               <div className="flex flex-col gap-3 mt-4">
                 <Link to={ROUTES.login} className="text-center py-3 hover:text-gold transition-colors">
                   Login
                 </Link>
-                <Button href="#booking" variant="gold" size="sm" className="w-full">
+                <Button href={ROUTES.hotels} variant="gold" size="sm">
                   Book Now
                 </Button>
               </div>
