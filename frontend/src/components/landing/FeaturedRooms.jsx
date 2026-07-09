@@ -24,13 +24,13 @@ export default function FeaturedRooms() {
       <Container>
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-8 mb-16">
           <SectionHeading
-            eyebrow="Accommodations"
-            title="Featured Rooms & Suites"
-            subtitle="Six distinct residences, each shaped around comfort, privacy, and a sense of arrival."
+            eyebrow="Our Portfolio"
+            title="Discover Boutique Hotels"
+            subtitle="A curated collection of independent boutique properties, each with its own character — united by the same standard of quiet luxury."
           />
-          {/* Placeholder target — becomes a real /rooms route in a later milestone */}
+          {/* TODO: point to a dedicated /hotels listing route in a later milestone */}
           <Button href="#rooms" variant="outline" size="sm" className="text-navy shrink-0">
-            View All Rooms
+            View All Hotels
           </Button>
         </div>
 
@@ -41,16 +41,18 @@ export default function FeaturedRooms() {
           viewport={{ once: true, amount: 0.2 }}
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10"
         >
-          {rooms.map((room) => (
-            <motion.div key={room.id} variants={shouldReduceMotion ? {} : fadeUp}>
+          {rooms.map((hotel) => (
+            <motion.div key={hotel.id} variants={shouldReduceMotion ? {} : fadeUp}>
               <RoomCard
-                image={room.image}
-                title={room.name}
-                description={room.description}
-                price={room.price}
-                rating={room.rating}
-                amenities={room.amenities}
-                badge={room.badge}
+                image={hotel.image}
+                name={hotel.name}
+                location={hotel.location}
+                price={hotel.price}
+                rating={hotel.rating}
+                roomsCount={hotel.roomsCount}
+                amenities={hotel.amenities}
+                badge={hotel.badge}
+                href={`#hotel-${hotel.id}`}
               />
             </motion.div>
           ))}
