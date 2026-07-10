@@ -11,7 +11,7 @@ export default function CallToAction() {
     <section className="relative py-24 md:py-32 bg-navy overflow-hidden">
       <div
         className="absolute inset-0 opacity-40 bg-cover bg-center"
-        style={{ backgroundImage: 'url(https://picsum.photos/seed/azurestay-cta/1920/800)' }}
+        style={{ backgroundImage: 'url(/src/assets/images/hero/hero-resort.jpg)' }}
         aria-hidden="true"
       />
       <div className="absolute inset-0 bg-navy/80" aria-hidden="true" />
