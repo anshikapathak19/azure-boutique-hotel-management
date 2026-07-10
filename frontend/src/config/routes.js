@@ -1,6 +1,8 @@
 export const ROUTES = {
   home: '/',
   hotels: '/hotels',
+  about: '/about',
+  contact: '/contact',
 
   login: '/login',
   register: '/register',
@@ -13,16 +15,15 @@ export const ROUTES = {
 export const NAV_LINKS = [
   { label: 'Home', path: ROUTES.home },
   { label: 'Hotels', path: ROUTES.hotels },
-  { label: 'Experience', path: '#experience' },
-  { label: 'Gallery', path: '#gallery' },
-  { label: 'Contact', path: '#contact' },
+  { label: 'About', path: ROUTES.about },
+  { label: 'Contact', path: ROUTES.contact },
 ]
 
 export const FOOTER_LINKS = [
   { label: 'Explore Hotels', path: ROUTES.hotels },
-  { label: 'About', path: '#about' },
+  { label: 'About', path: ROUTES.about },
   { label: 'Become a Partner Hotel', path: '#partner' },
-  { label: 'Contact', path: '#contact' },
+  { label: 'Contact', path: ROUTES.contact },
   { label: 'Privacy Policy', path: '#privacy' },
   { label: 'Terms & Conditions', path: '#terms' },
 ]

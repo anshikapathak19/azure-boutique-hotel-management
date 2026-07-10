@@ -61,12 +61,21 @@ export default function Footer() {
           <ul className="mt-5 space-y-3">
             {FOOTER_LINKS.map((link) => (
               <li key={link.label}>
-                <a
-                  href={link.path}
-                  className="font-body text-sm text-ivory/75 hover:text-gold transition-colors"
-                >
-                  {link.label}
-                </a>
+                {link.path.startsWith('/') ? (
+                  <Link
+                    to={link.path}
+                    className="font-body text-sm text-ivory/75 hover:text-gold transition-colors"
+                  >
+                    {link.label}
+                  </Link>
+                ) : (
+                  <a
+                    href={link.path}
+                    className="font-body text-sm text-ivory/75 hover:text-gold transition-colors"
+                  >
+                    {link.label}
+                  </a>
+                )}
               </li>
             ))}
           </ul>
