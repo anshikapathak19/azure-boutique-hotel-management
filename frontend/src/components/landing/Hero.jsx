@@ -5,8 +5,8 @@ import Container from '@/components/ui/Container.jsx'
 import Button from '@/components/ui/Button.jsx'
 import { ROUTES } from '@/config/routes.js'
 
-// Placeholder image — replace with a luxury boutique hotel image before final submission.
-const HERO_IMAGE = 'https://picsum.photos/seed/azurestay-hero/1920/1080'
+// Premium luxury boutique hotel hero image
+const HERO_IMAGE = '/src/assets/images/hero/hero-resort.jpg'
 
 const container = {
   hidden: {},

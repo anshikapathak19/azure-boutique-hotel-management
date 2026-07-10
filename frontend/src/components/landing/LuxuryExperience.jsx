@@ -33,8 +33,8 @@ const fadeIn = {
   show: { opacity: 1, y: 0, transition: { duration: 0.7, ease: 'easeOut' } },
 }
 
-// Placeholder — swap for real AzureStay photography before launch.
-const IMAGE = 'https://picsum.photos/seed/azurestay-experience/900/1100'
+// Premium luxury boutique experience image
+const IMAGE = '/src/assets/images/experience/experience-pool.jpg'
 
 export default function LuxuryExperience() {
   const shouldReduceMotion = useReducedMotion()

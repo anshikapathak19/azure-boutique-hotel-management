@@ -13,6 +13,9 @@ import { ROUTES } from '@/config/routes.js'
 const LandingPage = lazy(() => import('@/pages/public/LandingPage.jsx'))
 const LoginPage = lazy(() => import('@/pages/public/LoginPage.jsx'))
 const RegisterPage = lazy(() => import('@/pages/public/RegisterPage.jsx'))
+const ForgotPasswordPage = lazy(() => import('@/pages/public/ForgotPasswordPage.jsx'))
+const ResetPasswordPage = lazy(() => import('@/pages/public/ResetPasswordPage.jsx'))
+const EmailVerificationPage = lazy(() => import('@/pages/public/EmailVerificationPage.jsx'))
 const HotelListingPage = lazy(() => import('@/pages/public/HotelListingPage.jsx'))
 const HotelDetailPage = lazy(() => import('@/pages/public/HotelDetailPage.jsx'))
 const GuestDashboard = lazy(() => import('@/pages/guest/GuestDashboard.jsx'))
@@ -33,6 +36,9 @@ const router = createBrowserRouter([
       { path: ROUTES.home, element: withSuspense(LandingPage) },
       { path: ROUTES.login, element: withSuspense(LoginPage) },
       { path: ROUTES.register, element: withSuspense(RegisterPage) },
+      { path: '/forgot-password', element: withSuspense(ForgotPasswordPage) },
+      { path: '/reset-password', element: withSuspense(ResetPasswordPage) },
+      { path: '/verify-email', element: withSuspense(EmailVerificationPage) },
       { path: ROUTES.hotels, element: withSuspense(HotelListingPage) },
       { path: '/hotels/:id', element: withSuspense(HotelDetailPage) },
       { path: '*', element: <NotFoundPage /> },
@@ -42,19 +48,41 @@ const router = createBrowserRouter([
     path: ROUTES.guest,
     element: <GuestLayout />,
     errorElement: <NotFoundPage />,
-    children: [{ index: true, element: withSuspense(GuestDashboard) }],
+    children: [
+      { index: true, element: withSuspense(GuestDashboard) },
+      { path: 'bookings', element: withSuspense(GuestDashboard) },
+      { path: 'wishlist', element: withSuspense(GuestDashboard) },
+      { path: 'reviews', element: withSuspense(GuestDashboard) },
+      { path: 'profile', element: withSuspense(GuestDashboard) },
+      { path: 'settings', element: withSuspense(GuestDashboard) },
+    ],
   },
   {
     path: ROUTES.staff,
     element: <StaffLayout />,
     errorElement: <NotFoundPage />,
-    children: [{ index: true, element: withSuspense(StaffDashboard) }],
+    children: [
+      { index: true, element: withSuspense(StaffDashboard) },
+      { path: 'reservations', element: withSuspense(StaffDashboard) },
+      { path: 'checkin', element: withSuspense(StaffDashboard) },
+      { path: 'rooms', element: withSuspense(StaffDashboard) },
+      { path: 'requests', element: withSuspense(StaffDashboard) },
+      { path: 'messages', element: withSuspense(StaffDashboard) },
+    ],
   },
   {
     path: ROUTES.admin,
     element: <AdminLayout />,
     errorElement: <NotFoundPage />,
-    children: [{ index: true, element: withSuspense(AdminDashboard) }],
+    children: [
+      { index: true, element: withSuspense(AdminDashboard) },
+      { path: 'analytics', element: withSuspense(AdminDashboard) },
+      { path: 'bookings', element: withSuspense(AdminDashboard) },
+      { path: 'users', element: withSuspense(AdminDashboard) },
+      { path: 'hotels', element: withSuspense(AdminDashboard) },
+      { path: 'reviews', element: withSuspense(AdminDashboard) },
+      { path: 'settings', element: withSuspense(AdminDashboard) },
+    ],
   },
 ])
 

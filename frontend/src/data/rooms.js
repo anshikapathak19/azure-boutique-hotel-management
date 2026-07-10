@@ -16,7 +16,7 @@ export const rooms = [
     description:
       'Whitewashed suites carved into the caldera cliffside, each opening onto uninterrupted Aegean sunsets.',
     amenities: ['Infinity Pool', 'Sea View', 'Fine Dining', 'Free WiFi'],
-    image: 'https://picsum.photos/seed/azurestay-hotel-santorini/800/600',
+    image: '/src/assets/images/hotels/santorini-cliffside.jpg',
     badge: 'Most Popular',
   },
   {
@@ -31,7 +31,7 @@ export const rooms = [
     description:
       'A restored merchant townhouse blending traditional joinery with quiet, modern comfort in old Kyoto.',
     amenities: ['Free WiFi', 'Traditional Onsen', 'Tea Ceremony', 'Garden Courtyard'],
-    image: 'https://picsum.photos/seed/azurestay-hotel-kyoto/800/600',
+    image: '/src/assets/images/hotels/kyoto-machiya.jpg',
     badge: null,
   },
   {
@@ -46,7 +46,7 @@ export const rooms = [
     description:
       'Terraced suites tumbling down toward the Tyrrhenian Sea, with a private beach club and rooftop dining.',
     amenities: ['Private Pool', 'Fine Dining', 'Rooftop Terrace', 'Spa'],
-    image: 'https://picsum.photos/seed/azurestay-hotel-amalfi/800/600',
+    image: '/src/assets/images/hotels/amalfi-retreat.jpg',
     badge: 'Signature',
   },
   {
@@ -61,7 +61,7 @@ export const rooms = [
     description:
       'Private villas set among rice terraces and rainforest canopy, each with its own plunge pool and open-air pavilion.',
     amenities: ['Private Pool', 'Yoga Pavilion', 'Free WiFi', 'Rainforest View'],
-    image: 'https://picsum.photos/seed/azurestay-hotel-bali/800/600',
+    image: '/src/assets/images/hotels/bali-villas.jpg',
     badge: 'New',
   },
   {
@@ -76,7 +76,7 @@ export const rooms = [
     description:
       'Timber-clad chalets beneath the Matterhorn, with direct ski-in/ski-out access and a full-service alpine spa.',
     amenities: ['Spa', 'Mountain View', 'Ski-in/Ski-out', 'Fine Dining'],
-    image: 'https://picsum.photos/seed/azurestay-hotel-zermatt/800/600',
+    image: '/src/assets/images/hotels/alpine-chalet.jpg',
     badge: 'Exclusive',
   },
   {
@@ -91,7 +91,7 @@ export const rooms = [
     description:
       'Overwater villas with private decks and direct lagoon access, paired with dedicated butler service.',
     amenities: ['Butler Service', 'Private Pool', 'Snorkeling', 'Free WiFi'],
-    image: 'https://picsum.photos/seed/azurestay-hotel-maldives/800/600',
+    image: '/src/assets/images/hotels/overwater-villas.jpg',
     badge: 'Exclusive',
   },
   {
@@ -106,7 +106,7 @@ export const rooms = [
     description:
       'A restored 17th-century farmhouse on a working vineyard, with cellar tastings and rolling hillside views.',
     amenities: ['Fine Dining', 'Vineyard Tours', 'Free WiFi', 'Spa'],
-    image: 'https://picsum.photos/seed/azurestay-hotel-tuscany/800/600',
+    image: '/src/assets/images/hotels/tuscany-estate.jpg',
     badge: null,
   },
   {
@@ -119,9 +119,9 @@ export const rooms = [
     startingPrice: 390,
     roomsCount: 22,
     description:
-      'A discreet townhouse hotel in the heart of Le Marais, steps from the city\u2019s best galleries and cafés.',
+      'A discreet townhouse hotel in the heart of Le Marais, steps from the city’s best galleries and cafés.',
     amenities: ['Free WiFi', 'Fine Dining', 'City View', 'Butler Service'],
-    image: 'https://picsum.photos/seed/azurestay-hotel-paris/800/600',
+    image: '/src/assets/images/hotels/paris-maison.jpg',
     badge: null,
   },
   {
@@ -136,7 +136,7 @@ export const rooms = [
     description:
       'A traditional riad wrapped around a tiled courtyard pool, hidden behind an unmarked door in the old medina.',
     amenities: ['Free WiFi', 'Rooftop Terrace', 'Spa', 'Courtyard Pool'],
-    image: 'https://picsum.photos/seed/azurestay-hotel-marrakech/800/600',
+    image: '/src/assets/images/hotels/marrakech-riad.jpg',
     badge: 'Best Value',
   },
   {
@@ -151,7 +151,7 @@ export const rooms = [
     description:
       'A working wine estate lodge in the Cape Winelands, with mountain views and cellar-to-table dining.',
     amenities: ['Infinity Pool', 'Fine Dining', 'Vineyard Tours', 'Free WiFi'],
-    image: 'https://picsum.photos/seed/azurestay-hotel-capewinelands/800/600',
+    image: '/src/assets/images/hotels/cape-lodge.jpg',
     badge: null,
   },
   {
@@ -166,7 +166,7 @@ export const rooms = [
     description:
       'A converted lakeside haveli with hand-painted interiors and private boat access across Lake Pichola.',
     amenities: ['Butler Service', 'Lake View', 'Fine Dining', 'Free WiFi'],
-    image: 'https://picsum.photos/seed/azurestay-hotel-udaipur/800/600',
+    image: '/src/assets/images/hotels/udaipur-palace.jpg',
     badge: 'Signature',
   },
   {
@@ -179,9 +179,9 @@ export const rooms = [
     startingPrice: 240,
     roomsCount: 30,
     description:
-      'Private beachfront villas along Goa\u2019s southern coast, each with a plunge pool steps from the sand.',
+      'Private beachfront villas along Goa’s southern coast, each with a plunge pool steps from the sand.',
     amenities: ['Private Pool', 'Beachfront', 'Free WiFi', 'Spa'],
-    image: 'https://picsum.photos/seed/azurestay-hotel-goa/800/600',
+    image: '/src/assets/images/hotels/goa-villas.jpg',
     badge: null,
   },
   {
@@ -194,9 +194,9 @@ export const rooms = [
     startingPrice: 200,
     roomsCount: 20,
     description:
-      'A restored pink-city haveli with a courtyard pool and rooftop dining overlooking Jaipur\u2019s old town.',
+      'A restored pink-city haveli with a courtyard pool and rooftop dining overlooking Jaipur’s old town.',
     amenities: ['Free WiFi', 'Courtyard Pool', 'Fine Dining', 'Rooftop Terrace'],
-    image: 'https://picsum.photos/seed/azurestay-hotel-jaipur/800/600',
+    image: '/src/assets/images/hotels/jaipur-haveli.jpg',
     badge: 'Best Value',
   },
   {
@@ -211,7 +211,7 @@ export const rooms = [
     description:
       'A pine-forest lodge in the Himalayan foothills, with mountain-facing rooms and an evening bonfire deck.',
     amenities: ['Mountain View', 'Free WiFi', 'Bonfire Deck', 'Spa'],
-    image: 'https://picsum.photos/seed/azurestay-hotel-manali/800/600',
+    image: '/src/assets/images/hotels/manali-retreat.jpg',
     badge: null,
   },
   {
@@ -226,7 +226,7 @@ export const rooms = [
     description:
       'Waterfront villas along the Kerala backwaters, with private houseboat access and Ayurvedic wellness treatments.',
     amenities: ['Private Pool', 'Free WiFi', 'Houseboat Access', 'Ayurvedic Spa'],
-    image: 'https://picsum.photos/seed/azurestay-hotel-kerala/800/600',
+    image: '/src/assets/images/hotels/kerala-villas.jpg',
     badge: 'New',
   },
 ]

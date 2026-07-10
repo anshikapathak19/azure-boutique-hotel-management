@@ -145,9 +145,9 @@ export default function HotelDetailPage() {
   // Multi-image collection for gallery
   const galleryImages = [
     hotel.image,
-    'https://picsum.photos/seed/detail-1/1000/600',
-    'https://picsum.photos/seed/detail-2/1000/600',
-    'https://picsum.photos/seed/detail-3/1000/600',
+    '/src/assets/images/gallery/gallery-01.jpg',
+    '/src/assets/images/gallery/gallery-02.jpg',
+    '/src/assets/images/gallery/gallery-03.jpg',
   ]
 
   const selectedRoom = hotel.rooms?.find((r) => r.id === bookingForm.selectedRoomId)
