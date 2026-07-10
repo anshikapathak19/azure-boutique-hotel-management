@@ -18,6 +18,8 @@ const ResetPasswordPage = lazy(() => import('@/pages/public/ResetPasswordPage.js
 const EmailVerificationPage = lazy(() => import('@/pages/public/EmailVerificationPage.jsx'))
 const HotelListingPage = lazy(() => import('@/pages/public/HotelListingPage.jsx'))
 const HotelDetailPage = lazy(() => import('@/pages/public/HotelDetailPage.jsx'))
+const AboutPage = lazy(() => import('@/pages/public/AboutPage.jsx'))
+const ContactPage = lazy(() => import('@/pages/public/ContactPage.jsx'))
 const GuestDashboard = lazy(() => import('@/pages/guest/GuestDashboard.jsx'))
 const StaffDashboard = lazy(() => import('@/pages/staff/StaffDashboard.jsx'))
 const AdminDashboard = lazy(() => import('@/pages/admin/AdminDashboard.jsx'))
@@ -41,6 +43,8 @@ const router = createBrowserRouter([
       { path: '/verify-email', element: withSuspense(EmailVerificationPage) },
       { path: ROUTES.hotels, element: withSuspense(HotelListingPage) },
       { path: '/hotels/:id', element: withSuspense(HotelDetailPage) },
+      { path: ROUTES.about, element: withSuspense(AboutPage) },
+      { path: ROUTES.contact, element: withSuspense(ContactPage) },
       { path: '*', element: <NotFoundPage /> },
     ],
   },

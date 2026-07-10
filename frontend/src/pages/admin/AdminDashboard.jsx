@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
+import { useLocation, useNavigate } from 'react-router-dom'
 import {
   DollarSign, Users, Calendar, Star, BarChart2, Hotel, Settings,
-  TrendingUp, Eye, Trash2, CheckCircle, XCircle, Shield
+  Trash2
 } from 'lucide-react'
 
 import StatCard from '@/components/ui/StatCard.jsx'
@@ -21,13 +22,24 @@ import { HotelService } from '@/services/HotelService.js'
 import { useAuth } from '@/context/AuthContext.jsx'
 import { useToast } from '@/context/ToastContext.jsx'
 
+import { ROUTES } from '@/config/routes.js'
+
 const TABS = [
-  { id: 'overview', label: 'Overview' },
-  { id: 'bookings', label: 'Bookings' },
-  { id: 'users', label: 'Users' },
-  { id: 'reviews', label: 'Reviews' },
-  { id: 'settings', label: 'Settings' },
+  { id: 'overview', label: 'Overview', path: ROUTES.admin },
+  { id: 'analytics', label: 'Analytics', path: `${ROUTES.admin}/analytics` },
+  { id: 'bookings', label: 'Bookings', path: `${ROUTES.admin}/bookings` },
+  { id: 'users', label: 'Users', path: `${ROUTES.admin}/users` },
+  { id: 'hotels', label: 'Hotels', path: `${ROUTES.admin}/hotels` },
+  { id: 'reviews', label: 'Reviews', path: `${ROUTES.admin}/reviews` },
+  { id: 'settings', label: 'Settings', path: `${ROUTES.admin}/settings` },
 ]
+
+function useActiveTab() {
+  const location = useLocation()
+  const seg = location.pathname.split('/').filter(Boolean).pop()
+  const validIds = TABS.map((t) => t.id)
+  return validIds.includes(seg) ? seg : 'overview'
+}
 
 const BOOKING_STATUS_BADGE = {
   Confirmed: 'success',
@@ -104,7 +116,13 @@ function BarChart({ data = [], color = '#C8A96E', height = 160, label = '' }) {
 export default function AdminDashboard() {
   const { user } = useAuth()
   const { addToast } = useToast()
-  const [activeTab, setActiveTab] = useState('overview')
+  const navigate = useNavigate()
+  const activeTab = useActiveTab()
+
+  const handleTabChange = (tabId) => {
+    const tab = TABS.find((t) => t.id === tabId)
+    if (tab) navigate(tab.path)
+  }
   const [analytics, setAnalytics] = useState(null)
   const [bookings, setBookings] = useState([])
   const [users, setUsers] = useState([])
@@ -285,6 +303,52 @@ export default function AdminDashboard() {
     },
   ]
 
+  const hotelColumns = [
+    {
+      header: 'Hotel',
+      key: 'name',
+      render: (row) => (
+        <div className="flex items-center gap-3">
+          <img src={row.image} alt={row.name} className="w-10 h-7 object-cover rounded-md border border-navy/10 shrink-0" />
+          <div>
+            <p className="font-semibold text-sm text-navy">{row.name}</p>
+            <p className="text-xs text-navy/40 uppercase tracking-wider">{row.category}</p>
+          </div>
+        </div>
+      ),
+    },
+    {
+      header: 'Location',
+      key: 'location',
+      render: (row) => (
+        <div className="text-xs text-navy/70">
+          <p>{row.location}</p>
+          <p className="text-navy/40">{row.country}</p>
+        </div>
+      ),
+    },
+    {
+      header: 'Starting Price',
+      key: 'startingPrice',
+      render: (row) => <span className="font-semibold text-sm">${row.startingPrice.toLocaleString()} / night</span>,
+    },
+    {
+      header: 'Rating',
+      key: 'rating',
+      render: (row) => (
+        <div className="flex items-center gap-1">
+          <Star className="w-3.5 h-3.5 fill-gold text-gold" />
+          <span className="text-xs font-semibold text-navy">{row.rating.toFixed(1)}</span>
+        </div>
+      ),
+    },
+    {
+      header: 'Status',
+      key: 'status',
+      render: (row) => <Badge variant={row.badge ? 'gold' : 'default'}>{row.badge || 'Standard'}</Badge>,
+    },
+  ]
+
   return (
     <div className="p-6 md:p-8 lg:p-10">
       <motion.div
@@ -297,7 +361,7 @@ export default function AdminDashboard() {
           subtitle={`Signed in as ${user?.name || 'Administrator'}. Full platform visibility.`}
         />
 
-        <Tabs items={TABS} activeTab={activeTab} onChange={setActiveTab} className="mb-8" />
+        <Tabs items={TABS} activeTab={activeTab} onChange={handleTabChange} className="mb-8" />
 
         {/* ─── OVERVIEW ─────────────────────────────────── */}
         {activeTab === 'overview' && analytics && (
@@ -369,12 +433,71 @@ export default function AdminDashboard() {
               />
               <button
                 type="button"
-                onClick={() => setActiveTab('bookings')}
+                onClick={() => handleTabChange('bookings')}
                 className="mt-4 font-body text-xs text-gold hover:underline cursor-pointer"
               >
                 View all bookings →
               </button>
             </div>
+          </div>
+        )}
+
+        {/* ─── ANALYTICS ────────────────────────────────── */}
+        {activeTab === 'analytics' && analytics && (
+          <div className="space-y-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+              <StatCard
+                title="Total Revenue"
+                value={`$${analytics.stats.totalRevenue.toLocaleString()}`}
+                change={analytics.stats.revenueChange}
+                icon={DollarSign}
+              />
+              <StatCard
+                title="Occupancy Rate"
+                value={`${analytics.stats.occupancyRate}%`}
+                change={analytics.stats.occupancyChange}
+                icon={Hotel}
+              />
+              <StatCard
+                title="Active Bookings"
+                value={analytics.stats.activeBookings}
+                change={analytics.stats.bookingsChange}
+                icon={Calendar}
+              />
+              <StatCard
+                title="Avg Review Score"
+                value={analytics.stats.avgReviewScore}
+                icon={Star}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 gap-6">
+              <div className="bg-white rounded-2xl border border-navy/5 shadow-sm p-6 md:p-8">
+                <h3 className="font-display text-xl text-navy font-semibold mb-2">Revenue Growth Analysis</h3>
+                <p className="font-body text-xs text-navy/40 mb-6">Historical monthly revenue projection for AzureStay portfolio hotels.</p>
+                <BarChart data={analytics.revenueChart} color="#C8A96E" height={100} label="USD Revenue Projection" />
+              </div>
+
+              <div className="bg-white rounded-2xl border border-navy/5 shadow-sm p-6 md:p-8">
+                <h3 className="font-display text-xl text-navy font-semibold mb-2">Portfolio Occupancy Trends</h3>
+                <p className="font-body text-xs text-navy/40 mb-6">Aggregate occupancy percentages across all boutique properties.</p>
+                <BarChart data={analytics.occupancyChart} color="#1a2b4a" height={100} label="Occupancy Rate (%) Projection" />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ─── HOTELS ───────────────────────────────────── */}
+        {activeTab === 'hotels' && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="font-display text-xl text-navy font-semibold">Boutique Portfolio</h2>
+                <p className="font-body text-xs text-navy/55 mt-1">Manage active boutique properties in the catalog.</p>
+              </div>
+              <Badge variant="gold">{hotels.length} Properties Active</Badge>
+            </div>
+            <DataTable columns={hotelColumns} data={hotels} emptyMessage="No hotels in catalog." />
           </div>
         )}
 
