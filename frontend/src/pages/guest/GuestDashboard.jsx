@@ -66,7 +66,7 @@ function useActiveTab() {
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export default function GuestDashboard() {
-  const { user } = useAuth()
+  const { user, updateUser } = useAuth()
   const { addToast } = useToast()
   const navigate = useNavigate()
   const activeTab = useActiveTab()
@@ -182,6 +182,7 @@ export default function GuestDashboard() {
     try {
       const updated = await UserService.updateProfile(user.id, profileForm)
       setProfile(updated)
+      updateUser(updated)
       addToast('Profile updated successfully!', 'success')
     } catch {
       addToast('Failed to save profile.', 'error')

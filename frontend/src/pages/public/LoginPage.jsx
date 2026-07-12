@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { motion, useReducedMotion } from 'framer-motion'
 import { Gem, Lock, Mail, ArrowRight, Sparkles } from 'lucide-react'
@@ -23,6 +23,77 @@ export default function LoginPage() {
   const [serverError, setServerError] = useState('')
 
   const from = location.state?.from || ROUTES.home
+
+  // Intercept Google OAuth and Supabase Auth parameters
+  useEffect(() => {
+    // 1. Check for Supabase OAuth hash response
+    const hash = window.location.hash;
+    if (hash && hash.includes('access_token=')) {
+      const params = new URLSearchParams(hash.replace('#', '?'));
+      const token = params.get('access_token');
+      
+      if (token) {
+        setLoading(true);
+        // Call backend /me with this token to retrieve/create the custom profile!
+        fetch('http://localhost:5000/api/auth/me', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        })
+        .then(res => {
+          if (!res.ok) throw new Error('Failed to fetch profile.');
+          return res.json();
+        })
+        .then(user => {
+          localStorage.setItem('azurestay_token', token);
+          localStorage.setItem('azurestay_user', JSON.stringify(user));
+          
+          addToast(`Welcome back, ${user.name}!`, 'success');
+          
+          // Clear hash parameters from URL
+          window.history.replaceState(null, null, window.location.pathname);
+          
+          if (user.role === 'admin') {
+            window.location.href = ROUTES.admin;
+          } else if (user.role === 'staff') {
+            window.location.href = ROUTES.staff;
+          } else {
+            window.location.href = ROUTES.guest;
+          }
+        })
+        .catch(err => {
+          setLoading(false);
+          addToast('Failed to sync profile. Please try again.', 'error');
+        });
+      }
+      return;
+    }
+
+    // 2. Check for backend google oauth redirect query
+    const query = new URLSearchParams(window.location.search);
+    const token = query.get('token');
+    const userStr = query.get('user');
+
+    if (token && userStr) {
+      try {
+        const user = JSON.parse(decodeURIComponent(userStr));
+        localStorage.setItem('azurestay_token', token);
+        localStorage.setItem('azurestay_user', JSON.stringify(user));
+        
+        addToast(`Welcome back, ${user.name}!`, 'success');
+        
+        if (user.role === 'admin') {
+          window.location.href = ROUTES.admin;
+        } else if (user.role === 'staff') {
+          window.location.href = ROUTES.staff;
+        } else {
+          window.location.href = ROUTES.guest;
+        }
+      } catch (err) {
+        addToast('Failed to complete Google Sign In', 'error');
+      }
+    }
+  }, [navigate, addToast]);
 
   const validate = () => {
     const tempErrors = {}
@@ -188,25 +259,31 @@ export default function LoginPage() {
             </Button>
           </form>
 
-          {/* Social login placeholders */}
+          {/* Social login integration */}
           <div className="mt-8 border-t border-navy/5 pt-6 text-center space-y-4">
             <span className="font-body text-[10px] font-semibold text-navy/40 uppercase tracking-widest block">
               Or Connect Via
             </span>
-            <div className="flex gap-3">
+            <div className="flex gap-2.5">
               <button
                 type="button"
-                onClick={() => addToast('Azure AD B2C auth integration is prepared for next milestone.', 'info')}
-                className="flex-1 py-2.5 rounded-full border border-navy/10 hover:border-gold hover:text-gold font-body text-xs font-semibold text-navy/70 transition-all cursor-pointer bg-white"
-              >
-                Azure AD B2C
-              </button>
-              <button
-                type="button"
-                onClick={() => addToast('Google authentication is prepared for next milestone.', 'info')}
+                onClick={() => {
+                  setLoading(true);
+                  window.location.href = 'http://localhost:5000/api/auth/google';
+                }}
                 className="flex-1 py-2.5 rounded-full border border-navy/10 hover:border-gold hover:text-gold font-body text-xs font-semibold text-navy/70 transition-all cursor-pointer bg-white"
               >
                 Google
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setLoading(true);
+                  window.location.href = 'http://localhost:5000/api/auth/github';
+                }}
+                className="flex-1 py-2.5 rounded-full border border-navy/10 hover:border-gold hover:text-gold font-body text-xs font-semibold text-navy/70 transition-all cursor-pointer bg-white"
+              >
+                GitHub
               </button>
             </div>
           </div>
