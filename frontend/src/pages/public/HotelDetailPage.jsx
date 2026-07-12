@@ -2,6 +2,11 @@ import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { motion, useReducedMotion } from 'framer-motion'
 import { Star, MapPin, CalendarDays, Users, Shield, Coffee, Wifi, Waves, Wind, ChevronLeft, ChevronRight, Award, Key } from 'lucide-react'
+import { loadStripe } from '@stripe/stripe-js'
+import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js'
+
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || 'pk_test_51TsOrLKHXH0uenHzwKXoI0s4SiXgEnvrLtCMSsoanYXBo9ppirBEy4hU7laj1546UYMqoiJPRjf4uDklRRHMKFz300cMMSaL5L')
+
 
 import Container from '@/components/ui/Container.jsx'
 import Button from '@/components/ui/Button.jsx'
@@ -48,7 +53,7 @@ const AMENITY_ICONS = {
 export default function HotelDetailPage() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const { user, isAuthenticated } = useAuth()
+  const { user, isAuthenticated, updateUser } = useAuth()
   const { addToast } = useToast()
   const shouldReduceMotion = useReducedMotion()
 
@@ -71,6 +76,14 @@ export default function HotelDetailPage() {
   const [bookingLoading, setBookingLoading] = useState(false)
   const [bookingError, setBookingError] = useState('')
   const [bookingSuccess, setBookingSuccess] = useState(false)
+  const [showPaymentModal, setShowPaymentModal] = useState(false)
+  const [paymentForm, setPaymentForm] = useState({
+    cardName: '',
+    cardNumber: '4242 4242 4242 4242',
+    cardExpiry: '12/28',
+    cardCvc: '123',
+    paymentMethod: 'card'
+  })
 
   // Review Form State
   const [reviewForm, setReviewForm] = useState({
@@ -169,7 +182,7 @@ export default function HotelDetailPage() {
   const serviceFee = nights ? 25 : 0
   const totalPrice = basePrice + tax + serviceFee
 
-  const handleBookingSubmit = async (e) => {
+  const handleBookingSubmit = (e) => {
     e.preventDefault()
     if (!bookingForm.checkIn || !bookingForm.checkOut) {
       setBookingError('Please specify check-in and check-out dates.')
@@ -190,14 +203,28 @@ export default function HotelDetailPage() {
       return
     }
 
+    // Set user's name on card as default
+    setPaymentForm((prev) => ({
+      ...prev,
+      cardName: user?.name || ''
+    }))
+
+    setShowPaymentModal(true)
+  }
+
+  const handleProcessPayment = async (e) => {
+    e.preventDefault()
     setBookingLoading(true)
     setBookingError('')
 
     try {
-      await BookingService.createBooking({
+      // Simulate dummy payment gateway authorization processing (2 seconds)
+      await new Promise((resolve) => setTimeout(resolve, 2000))
+
+      const result = await BookingService.createBooking({
         hotelId: hotel.id,
         hotelName: hotel.name,
-        guestId: user.id,
+        guestId: user.id || user._id,
         guestName: user.name,
         guestEmail: user.email,
         roomType: selectedRoom.name,
@@ -206,10 +233,17 @@ export default function HotelDetailPage() {
         guestsCount: Number(bookingForm.guests),
         totalPrice,
       })
+
+      // Dynamically update member points and tier in frontend context
+      if (result.user) {
+        updateUser(result.user)
+      }
+
+      setShowPaymentModal(false)
       setBookingSuccess(true)
-      addToast('Your reservation request has been sent!', 'success')
+      addToast('Payment successful! Your reservation is confirmed.', 'success')
     } catch (err) {
-      setBookingError(err.message || 'Failed to complete booking request.')
+      setBookingError(err.message || 'Payment processing failed.')
     } finally {
       setBookingLoading(false)
     }
@@ -650,6 +684,31 @@ export default function HotelDetailPage() {
         )}
       </Container>
 
+      {/* Checkout & Secure Payment Modal */}
+      <Modal
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        title="Secure Checkout"
+        className="max-w-md"
+      >
+        <Elements stripe={stripePromise}>
+          <PaymentModalContent
+            hotel={hotel}
+            selectedRoom={selectedRoom}
+            bookingForm={bookingForm}
+            nights={nights}
+            totalPrice={totalPrice}
+            user={user}
+            updateUser={updateUser}
+            addToast={addToast}
+            setShowPaymentModal={setShowPaymentModal}
+            setBookingSuccess={setBookingSuccess}
+            bookingError={bookingError}
+            setBookingError={setBookingError}
+          />
+        </Elements>
+      </Modal>
+
       {/* Success Booking Dialog Modal */}
       <Modal
         isOpen={bookingSuccess}
@@ -683,5 +742,247 @@ export default function HotelDetailPage() {
         </div>
       </Modal>
     </div>
+  )
+}
+
+function PaymentModalContent({
+  hotel,
+  selectedRoom,
+  bookingForm,
+  nights,
+  totalPrice,
+  user,
+  updateUser,
+  addToast,
+  setShowPaymentModal,
+  setBookingSuccess,
+  bookingError,
+  setBookingError,
+}) {
+  const stripe = useStripe()
+  const elements = useElements()
+
+  const [paymentMethod, setPaymentMethod] = useState('stripe') // 'stripe', 'cash', 'points'
+  const [cardName, setCardName] = useState(user?.name || '')
+  const [loading, setLoading] = useState(false)
+
+  const handleProcessPayment = async (e) => {
+    e.preventDefault()
+    setLoading(true)
+    setBookingError('')
+
+    try {
+      let finalPaymentMethod = paymentMethod;
+
+      if (paymentMethod === 'stripe') {
+        if (!stripe || !elements) {
+          throw new Error('Stripe is not fully initialized. Please try again.')
+        }
+
+        // 1. Create Stripe PaymentIntent on backend
+        const intentRes = await BookingService.createPaymentIntent(totalPrice)
+        const clientSecret = intentRes.clientSecret
+
+        // 2. Confirm card payment with Stripe client
+        const cardElement = elements.getElement(CardElement)
+        const result = await stripe.confirmCardPayment(clientSecret, {
+          payment_method: {
+            card: cardElement,
+            billing_details: {
+              name: cardName,
+              email: user?.email,
+            },
+          },
+        })
+
+        if (result.error) {
+          throw new Error(result.error.message)
+        }
+
+        finalPaymentMethod = 'card'
+      }
+
+      // 3. Create the final booking document in Cosmos DB
+      const result = await BookingService.createBooking({
+        hotelId: hotel.id,
+        hotelName: hotel.name,
+        guestId: user?.id || user?._id,
+        guestName: user?.name,
+        guestEmail: user?.email,
+        roomType: selectedRoom.name,
+        checkIn: bookingForm.checkIn,
+        checkOut: bookingForm.checkOut,
+        guestsCount: Number(bookingForm.guests),
+        totalPrice,
+        paymentMethod: finalPaymentMethod,
+      })
+
+      // 4. Update rewards and points balance in local context
+      if (result.user) {
+        updateUser(result.user)
+      }
+
+      setShowPaymentModal(false)
+      setBookingSuccess(true)
+      addToast(
+        finalPaymentMethod === 'card'
+          ? 'Payment authorized. Booking confirmed!'
+          : 'Booking recorded successfully!',
+        'success'
+      )
+    } catch (err) {
+      setBookingError(err.message || 'Payment processing failed.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <form onSubmit={handleProcessPayment} className="space-y-5">
+      <div className="bg-ivory/50 rounded-xl p-4 border border-navy/5 font-body text-xs text-navy/70 space-y-2">
+        <h4 className="font-semibold text-navy text-sm border-b border-navy/10 pb-2 mb-2">Reservation Summary</h4>
+        <div className="flex justify-between">
+          <span>Hotel:</span>
+          <span className="font-semibold text-navy">{hotel.name}</span>
+        </div>
+        <div className="flex justify-between">
+          <span>Suite:</span>
+          <span className="font-semibold text-navy">{selectedRoom?.name}</span>
+        </div>
+        <div className="flex justify-between">
+          <span>Stay Duration:</span>
+          <span className="font-semibold text-navy">{bookingForm.checkIn} to {bookingForm.checkOut} ({nights} nights)</span>
+        </div>
+        <div className="flex justify-between text-sm font-semibold text-navy border-t border-navy/10 pt-2 mt-2">
+          <span>Total Amount:</span>
+          <span className="text-gold font-bold">${totalPrice}</span>
+        </div>
+      </div>
+
+      <div className="flex flex-col sm:flex-row gap-2 p-1 bg-ivory rounded-lg border border-navy/5">
+        <button
+          type="button"
+          onClick={() => setPaymentMethod('stripe')}
+          className={[
+            'flex-1 py-1.5 rounded-md text-xs font-body font-semibold transition-all cursor-pointer border-0 bg-transparent',
+            paymentMethod === 'stripe' ? 'bg-white text-navy shadow-sm' : 'text-navy/55 hover:text-navy'
+          ].join(' ')}
+        >
+          Card (Stripe)
+        </button>
+        <button
+          type="button"
+          onClick={() => setPaymentMethod('cash')}
+          className={[
+            'flex-1 py-1.5 rounded-md text-xs font-body font-semibold transition-all cursor-pointer border-0 bg-transparent',
+            paymentMethod === 'cash' ? 'bg-white text-navy shadow-sm' : 'text-navy/55 hover:text-navy'
+          ].join(' ')}
+        >
+          Cash on Delivery
+        </button>
+        <button
+          type="button"
+          onClick={() => setPaymentMethod('points')}
+          className={[
+            'flex-1 py-1.5 rounded-md text-xs font-body font-semibold transition-all cursor-pointer border-0 bg-transparent',
+            paymentMethod === 'points' ? 'bg-white text-navy shadow-sm' : 'text-navy/55 hover:text-navy'
+          ].join(' ')}
+        >
+          Rewards Points
+        </button>
+      </div>
+
+      {paymentMethod === 'stripe' && (
+        <div className="space-y-4">
+          <div>
+            <label className="block text-[10px] font-body font-semibold text-navy/60 uppercase tracking-wider mb-1.5">Cardholder Name</label>
+            <input
+              type="text"
+              required
+              value={cardName}
+              onChange={(e) => setCardName(e.target.value)}
+              placeholder="Sophia Sterling"
+              className="w-full bg-white border border-navy/10 rounded-xl px-4 py-2.5 font-body text-sm text-navy focus:outline-none focus:border-gold transition-colors"
+            />
+          </div>
+          <div>
+            <label className="block text-[10px] font-body font-semibold text-navy/60 uppercase tracking-wider mb-1.5">Card Details</label>
+            <div className="w-full bg-white border border-navy/10 rounded-xl px-4 py-3.5 focus-within:border-gold transition-colors">
+              <CardElement
+                options={{
+                  style: {
+                    base: {
+                      fontSize: '14px',
+                      color: '#0a1128',
+                      fontFamily: 'Inter, sans-serif',
+                      '::placeholder': { color: '#a0aec0' },
+                    },
+                    invalid: { color: '#e53e3e' },
+                  },
+                }}
+              />
+            </div>
+            <span className="block text-[9px] text-navy/40 mt-1">Use Stripe test card: 4242 4242 4242 4242</span>
+          </div>
+        </div>
+      )}
+
+      {paymentMethod === 'cash' && (
+        <div className="bg-emerald-50/50 rounded-xl p-5 border border-emerald-100/60 text-center space-y-2">
+          <span className="font-body text-xs text-emerald-800 font-semibold block">🏨 Pay at Hotel (Cash on Delivery)</span>
+          <span className="font-body text-[11px] text-navy/60 block leading-relaxed">
+            Your booking request will be confirmed immediately in our system. You will pay the full balance of <strong>${totalPrice}</strong> at the front desk upon check-in or check-out.
+          </span>
+        </div>
+      )}
+
+      {paymentMethod === 'points' && (
+        <div className="bg-gold/5 rounded-xl p-5 border border-gold/20 text-center space-y-2">
+          <span className="font-body text-xs text-navy/60 block">Your Current Points Balance</span>
+          <span className="font-display text-2xl font-bold text-gold block">{(user?.points || 0).toLocaleString()} pts</span>
+          <span className="font-body text-[10px] text-navy/40 block">Points required for this reservation: {(totalPrice * 10).toLocaleString()} pts</span>
+          {(user?.points || 0) < totalPrice * 10 && (
+            <p className="text-xs text-rose-500 font-body mt-2">
+              ⚠️ Insufficient points. Card or Cash payment required.
+            </p>
+          )}
+        </div>
+      )}
+
+      {bookingError && (
+        <p className="font-body text-xs text-rose-500 text-center bg-rose-50 rounded-xl p-3 border border-rose-100">
+          {bookingError}
+        </p>
+      )}
+
+      <div className="flex gap-3 mt-6">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          disabled={loading}
+          onClick={() => setShowPaymentModal(false)}
+          className="flex-1 cursor-pointer"
+        >
+          Cancel
+        </Button>
+        <Button
+          type="submit"
+          variant="gold"
+          size="sm"
+          disabled={loading || (paymentMethod === 'points' && (user?.points || 0) < totalPrice * 10)}
+          className="flex-1 cursor-pointer shadow-md"
+        >
+          {loading ? (
+            <span className="inline-flex items-center gap-2">
+              <span className="w-3.5 h-3.5 border-2 border-navy border-t-transparent rounded-full animate-spin" />
+              Processing...
+            </span>
+          ) : (
+            paymentMethod === 'cash' ? 'Confirm Reservation' : `Pay $${totalPrice}`
+          )}
+        </Button>
+      </div>
+    </form>
   )
 }

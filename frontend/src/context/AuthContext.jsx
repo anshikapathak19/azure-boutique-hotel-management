@@ -31,6 +31,11 @@ export function AuthProvider({ children }) {
     setUser(null)
   }
 
+  const updateUser = (updated) => {
+    setUser(updated)
+    localStorage.setItem('azurestay_user', JSON.stringify(updated))
+  }
+
   const value = useMemo(
     () => ({
       user,
@@ -38,6 +43,7 @@ export function AuthProvider({ children }) {
       isAuthenticated: Boolean(user),
       login,
       logout,
+      updateUser,
     }),
     [user, loading],
   )
